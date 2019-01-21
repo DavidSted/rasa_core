@@ -15,13 +15,13 @@ class WorkingPolicy(Policy):
     @classmethod
     def load(cls, path):
         return WorkingPolicy()
-    
+
     def persist(self, path):
         pass
-    
+
     def train(self, training_trackers, domain, **kwargs):
         pass
-    
+
     def predict_action_probabilities(self, tracker, domain):
         """Predicts always a predefined confidence vector"""
         global CONF_PRED
@@ -29,7 +29,7 @@ class WorkingPolicy(Policy):
         idx = domain.index_for_action("action_default_fallback")
         result[idx] = CONF_PRED
         return result
-    
+
     def __eq__(self, other):
         return isinstance(other, WorkingPolicy)
 
@@ -37,7 +37,7 @@ class WorkingPolicy(Policy):
 def _load_tracker(domain):
     tracker_dump = "data/test_trackers/tracker_moodbot.json"
     tracker_json = json.loads(utils.read_file(tracker_dump))
-    
+
     tracker = DialogueStateTracker.from_dict(tracker_json.get("sender_id"),
                                              tracker_json.get("events", []),
                                              domain.slots)
@@ -51,17 +51,17 @@ def test_fallback_because_of_low_core_confidence(caplog):
     """
     global CONF_PRED
     CONF_PRED = 0.1
+    fan = "action_default_fallback"
     fallback_pol = FallbackPolicy(nlu_threshold=0.01, core_threshold=0.3,
-                                  fallback_action_name=
-                                  "action_default_fallback")
+                                  fallback_action_name=fan)
     ensemble_pol = SimplePolicyEnsemble([WorkingPolicy(), fallback_pol])
-    
+
     # load domain
     domain = Domain.load(DOMAIN_PATH)
-    
+
     # load tracker
     tracker = _load_tracker(domain)
-    
+
     ensemble_pol.probabilities_using_best_policy(tracker, domain)
     assert "Core confidence" in caplog.text
 
@@ -73,16 +73,16 @@ def test_fallback_not_because_of_low_core_confidence(caplog):
     """
     global CONF_PRED
     CONF_PRED = 1
+    fan = "action_default_fallback"
     fallback_pol = FallbackPolicy(nlu_threshold=0.01, core_threshold=0.3,
-                                  fallback_action_name=
-                                  "action_default_fallback")
+                                  fallback_action_name=fan)
     ensemble_pol = SimplePolicyEnsemble([WorkingPolicy(), fallback_pol])
-    
+
     # load domain
     domain = Domain.load(DOMAIN_PATH)
-    
+
     # load tracker
     tracker = _load_tracker(domain)
-    
+
     ensemble_pol.probabilities_using_best_policy(tracker, domain)
     assert "Core confidence" not in caplog.text

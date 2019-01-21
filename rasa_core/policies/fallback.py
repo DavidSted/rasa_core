@@ -69,13 +69,13 @@ class FallbackPolicy(Policy):
         # it is set to 1.0 here in order
         # to not override standard behaviour
         nlu_confidence = tracker.latest_message.parse_data["intent"].get(
-                "confidence", 1.0)
+                "confidence", 1.0)  # noqa
 
         # check if this policy predicts something not because of the
         # core_threshold
         if tracker.latest_action_name == self.fallback_action_name or \
-                self.should_nlu_fallback(
-                        nlu_confidence, tracker.latest_action_name):
+                self.should_nlu_fallback(nlu_confidence,
+                                         tracker.latest_action_name):
             return False
 
         # this policy would suggest a fallback with the core_threshold

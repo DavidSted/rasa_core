@@ -358,8 +358,7 @@ class SimplePolicyEnsemble(PolicyEnsemble):
             if best_policy.triggers_because_of_core_threshold(tracker):
                 logger.debug("Core confidence {} is below threshold {}. "
                              "Predicting fallback action: {}".format(
-                                max_confidence_no_fallback,
-                                max_confidence,
+                                max_confidence_no_fallback, max_confidence,
                                 best_policy.fallback_action_name))
 
         # normalize probablilities
