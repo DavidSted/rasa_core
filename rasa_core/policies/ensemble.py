@@ -289,6 +289,8 @@ class SimplePolicyEnsemble(PolicyEnsemble):
 
     @staticmethod
     def is_not_memo_policy(best_policy_name):
+        if not best_policy_name:
+            return True
         is_memo = best_policy_name.endswith(
             "_" + MemoizationPolicy.__name__)
         is_augmented = best_policy_name.endswith(
@@ -302,6 +304,8 @@ class SimplePolicyEnsemble(PolicyEnsemble):
         result = None
         max_confidence = -1
         best_policy_name = None
+        best_policy = None
+        max_confidence_no_fallback = -1
 
         for i, p in enumerate(self.policies):
             probabilities = p.predict_action_probabilities(tracker, domain)
@@ -312,7 +316,11 @@ class SimplePolicyEnsemble(PolicyEnsemble):
             if confidence > max_confidence:
                 max_confidence = confidence
                 result = probabilities
+                best_policy = p
                 best_policy_name = 'policy_{}_{}'.format(i, type(p).__name__)
+            if not isinstance(p, FallbackPolicy) and confidence > \
+                    max_confidence_no_fallback:
+                max_confidence_no_fallback = confidence
 
         if (result.index(max_confidence) ==
                 domain.index_for_action(ACTION_LISTEN_NAME) and
@@ -341,6 +349,18 @@ class SimplePolicyEnsemble(PolicyEnsemble):
                 best_policy_name = 'policy_{}_{}'.format(
                     fallback_idx,
                     type(fallback_policy).__name__)
+
+        # Has a fallback policy the highest confidence?
+        elif best_policy and isinstance(best_policy, FallbackPolicy):
+            # Log the highest core confidence except not predicted from a
+            # fallback policy, if the fallback policy was triggered because
+            # of the core_threshold
+            if best_policy.triggers_because_of_core_threshold(tracker):
+                logger.debug("Core confidence {} is below threshold {}. "
+                             "Predicting fallback action: {}".format(
+                                max_confidence_no_fallback,
+                                max_confidence,
+                                best_policy.fallback_action_name))
 
         # normalize probablilities
         if np.sum(result) != 0:

@@ -58,6 +58,29 @@ class FallbackPolicy(Policy):
 
         pass
 
+    def triggers_because_of_core_threshold(self, tracker):
+        """Check whether this policy triggers because of a low core confidence
+
+        In detail this method returns True whenever this policy would predict
+        a fallback because the core_threshold is't met.
+        """
+
+        # if the NLU interpreter does not provide a confidence score,
+        # it is set to 1.0 here in order
+        # to not override standard behaviour
+        nlu_confidence = tracker.latest_message.parse_data["intent"].get(
+                "confidence", 1.0)
+
+        # check if this policy predicts something not because of the
+        # core_threshold
+        if tracker.latest_action_name == self.fallback_action_name or \
+                self.should_nlu_fallback(
+                        nlu_confidence, tracker.latest_action_name):
+            return False
+
+        # this policy would suggest a fallback with the core_threshold
+        return True
+
     def should_nlu_fallback(self,
                             nlu_confidence: float,
                             last_action_name: Text
