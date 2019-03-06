@@ -12,22 +12,48 @@ This project adheres to `Semantic Versioning`_ starting with version 0.2.0.
 
 Added
 -----
+- ``tf.ConfigProto`` configuration can now be specified
+  for tensorflow based pipelines
+- open api spec for the Rasa Core SDK action server
+- documentation about early deactivation of a form in validation
+- utility functions for colored logging
+- open webbrowser when visualizing stories
+- added ability to use multiple env vars per line in yaml files
+- added ``priority`` property of policies to influence best policy in the case of equal confidence
 
 Changed
 -------
+- starter packs are now tested in parallel with the unittests,
+  and only on master and branches ending in ``.x`` (i.e. new version releases)
+- renamed ``train_dialogue_model`` to ``train``
+- renamed ``rasa_core.evaluate`` to ``rasa_core.test``
+- ``scores`` array returned by the ``/conversations/{sender_id}/predict``
+  endpoint is now sorted according to the actions' scores.
+- changed payloads from "text" to "message" in files: server.yml, docs/connectors.rst, rasa_core/server.py, rasa_core/training/interactive.py, tests/test_interactive.py
 
 Removed
 -------
+- removed ``admin_token`` from ``RasaChatInput`` since it wasn't used
 
 Fixed
 -----
+- Handles slot names which contain characters that are invalid as python variable name (e.g. dot) in a template
+- When a ``fork`` is used in interactive learning, every forked storyline is saved (not just the last)
+
+[0.13.2] - 2019-02-06
+^^^^^^^^^^^^^^^^^^^^^
+
+Changed
+-------
+- ``MessageProcessor`` now also passes ``message_id`` to the interpreter
+  when parsing with a ``RasaNLUHttpInterpreter``
 
 [0.13.1] - 2019-01-29
 ^^^^^^^^^^^^^^^^^^^^^
 
-Removed
--------
-- ``message_id`` can now be passed in the payload to the ``NLUHttpInterpreter``
+Added
+-----
+- ``message_id`` can now be passed in the payload to the ``RasaNLUHttpInterpreter``
 
 Fixed
 -----
